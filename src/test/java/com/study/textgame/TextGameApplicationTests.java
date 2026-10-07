@@ -1,10 +1,10 @@
-package com.study.history;
+package com.study.textgame;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class HistoryApplicationTests {
+class TextGameApplicationTests {
 
   @Test
   void contextLoads() {

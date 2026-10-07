@@ -1,13 +1,15 @@
-package com.study.history.dto;
+package com.study.textgame.dto;
 
+import com.study.textgame.entity.Grade;
 import java.time.LocalDateTime;
 
-public class MemoResponse {
+public class ItemResponse {
   private Long id;
-  private String title;
-  private String content;
+  private String name;
+  private String description;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private Grade grade;
 
   // Getters and setters
   public Long getId() {
@@ -18,20 +20,20 @@ public class MemoResponse {
     this.id = id;
   }
 
-  public String getTitle() {
-    return title;
+  public String getName() {
+    return name;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public String getContent() {
-    return content;
+  public String getDescription() {
+    return description;
   }
 
-  public void setContent(String content) {
-    this.content = content;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public LocalDateTime getCreatedAt() {
@@ -48,5 +50,14 @@ public class MemoResponse {
 
   public void setUpdatedAt(LocalDateTime updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+
+  public Grade getGrade() {
+      return grade;
+  }
+
+  public void setGrade(Grade grade) {
+      this.grade = grade;
   }
 }

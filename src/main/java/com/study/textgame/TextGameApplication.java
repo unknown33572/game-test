@@ -1,13 +1,13 @@
-package com.study.history;
+package com.study.textgame;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HistoryApplication {
+public class TextGameApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(HistoryApplication.class, args);
+    SpringApplication.run(TextGameApplication.class, args);
   }
 
 }
