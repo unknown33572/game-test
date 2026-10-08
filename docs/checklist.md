@@ -141,7 +141,7 @@
 
 ## 이후 로드맵 (1단계)
 
-게임 방향은 [game-design-v0.1.md](game-design-v0.1.md)를 따른다. 12주 범위는 그 문서의 부록에 정리했다.
+게임 방향은 [game-design-v0.1.md](game-design-v0.1.md)를 따른다. 12주 범위는 그 문서의 부록에, 마일스톤별 개발 계획은 [dev-plan.md](dev-plan.md)에 정리했다.
 
 1. 아이템 도감 API 백지 반복 ← 지금 (1회차 완료, 2회차는 확인용)
 2. 게임 코어 (Spring 의존 없는 순수 Java + JUnit)
