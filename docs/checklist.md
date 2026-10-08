@@ -11,27 +11,41 @@
 
 - [x] Docker로 PostgreSQL 컨테이너를 띄우고 Spring이 연결됨
 - [x] Item 테이블이 JPA로 생성됨
-- [ ] 5개 API가 각각 정상 응답함 (Postman) — 등록만 확인
-- [ ] 없는 id로 조회·수정·삭제했을 때 응답 확인
+- [x] 5개 API가 각각 정상 응답함 — 10-08 실행 확인
+- [x] 없는 id로 조회·수정·삭제했을 때 응답 확인 — 10-08 실행 확인 (모두 404)
 - [ ] 요청 하나가 Controller → Service → Repository → DB를 지나는 흐름을 말로 설명
 
-### Postman 실행 검증
+### 실행 검증
 
 보내기 전에 예상 상태 코드를 먼저 적고, 실제 결과와 비교한다.
 
-| 순서 | 요청 | 예상 | 실제 | 확인할 것 |
-|---|---|---|---|---|
-| 1 | `POST /items` `{"name":"강철 검","description":"잘 벼린 검","grade":"RARE"}` | 200 | 200 | 응답에 `id`, `grade: RARE` |
-| 2 | `POST /items` `grade: "전썰"` | | | 어느 단계에서 막히는가 (Jackson 변환) |
-| 3 | `POST /items` `grade` 생략 | | | 어느 단계에서 막히는가 (`@Valid`) |
-| 4 | `GET /items` | | | 등록한 아이템이 배열에 있음 |
-| 5 | `GET /items/1` | | | 등록 응답과 같은 모양 |
-| 6 | `PUT /items/1` 이름·등급을 **다른 값**으로 | | | 응답에 새 값, `updatedAt` 채워짐, 로그에 `update item set ...` |
-| 7 | `GET /items/999` | | | 404 + 메시지 |
-| 8 | `PUT /items/999` | | | 404 |
-| 9 | `DELETE /items/1` | | | 204, 본문 없음 |
-| 10 | `DELETE /items/1` (한 번 더) | | | 404 |
-| 11 | `GET /items` | | | 빈 배열 `[]` |
+- 1번: 10-07 S가 Postman으로 확인
+- 나머지: 10-08 Claude가 curl로 확인 (다른 세션이 8080을 써서 jar를 8081로 실행). 예상 칸은 이번에 건너뜀
+- 1번 아이템(강철 검)을 남기려고 수정·삭제는 새로 등록한 2번(`시험용 단검`)으로 시험함
+
+| 순서 | 요청 | 예상 | 실제 | 확인할 것 | 결과 |
+|---|---|---|---|---|---|
+| 1 | `POST /items` `{"name":"강철 검","description":"잘 벼린 검","grade":"RARE"}` | 200 | 200 | 응답에 `id`, `grade: RARE` | `id: 1`, `grade: RARE` |
+| 1-2 | `POST /items` `{"name":"시험용 단검",...,"grade":"NORMAL"}` | | 200 | 수정·삭제 시험용 | `id: 2` |
+| 2 | `POST /items` `grade: "전썰"` | | 400 | 어느 단계에서 막히는가 | JSON 변환 단계 (`HttpMessageNotReadableException`) |
+| 3 | `POST /items` `grade` 생략 | | 400 | 어느 단계에서 막히는가 | `@Valid` 검사 (`MethodArgumentNotValidException`) |
+| 3-2 | `POST /items` `name: ""` | | 400 | | `@NotBlank` |
+| 4 | `GET /items` | | 200 | 등록한 아이템이 배열에 있음 | 확인 |
+| 5 | `GET /items/1` | | 200 | 등록 응답과 같은 모양 | 확인 |
+| 6 | `PUT /items/2` → `시험용 대검`, `LEGEND` | | 200 | 응답에 새 값, `updatedAt` 채워짐, 로그에 `update item set ...` | 모두 확인. `save()` 없이 `select` → `update` |
+| 7 | `GET /items/999` | | 404 | 404 + 메시지 | `아이템을 찾을 수 없습니다. id=999` |
+| 8 | `PUT /items/999` | | 404 | 404 | 확인 |
+| 9 | `DELETE /items/2` | | 204 | 204, 본문 없음 | 확인. SQL은 `select` 1번 + `delete` |
+| 10 | `DELETE /items/2` (한 번 더) | | 404 | 404 | 확인 |
+| 11 | `GET /items` | | 200 | 2번이 사라짐 | 1번만 남음 |
+| 12 | `GET /items/abc` | | 400 | | 경로 값 → `Long` 변환 실패 (`MethodArgumentTypeMismatchException`) |
+
+### 실행하면서 알게 된 것
+
+- **400은 원인을 말해 주지 않는다.** 처리기가 없는 400은 본문이 모두 `{"status":400,"error":"Bad Request"}`로 같다. 원인은 서버 로그(`Resolved [...]`)를 봐야 알 수 있다. → 확장 과제 "오류 응답 형식 통일"
+- **Windows에서 curl 명령 인자에 한글 JSON을 넣으면 CP949로 전송된다.** 로그에 `Invalid UTF-8 start byte`가 찍히고 400이 난다. 본문은 UTF-8 파일로 만들어 `--data-binary @파일`로 보낸다. Postman은 해당 없음.
+- **Hibernate는 기본적으로 모든 컬럼을 UPDATE한다.** 바뀌지 않은 `created_at`도 `set` 절에 들어간다.
+- **시각 정밀도:** `LocalDateTime.now()`는 소수점 7자리(`...07.8695867`), PostgreSQL `timestamp(6)`은 6자리라서 저장할 때 반올림된다(`...07.869587`). 같은 아이템이라도 등록 응답과 조회 응답의 `createdAt`이 다르게 보인다. 저장했다 읽은 시각끼리 비교할 때 주의 (게임 코어의 수령 시각).
 
 ### 흐름 설명 과제
 
