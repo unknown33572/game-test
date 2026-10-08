@@ -3,6 +3,7 @@ package com.study.textgame.service.impl;
 import com.study.textgame.dto.ItemRequest;
 import com.study.textgame.dto.ItemResponse;
 import com.study.textgame.entity.Item;
+import com.study.textgame.exception.ItemNotFoundException;
 import com.study.textgame.repository.ItemRepository;
 import com.study.textgame.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public ItemResponse getItem(Long id) {
 
-    Item item = itemRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User is not" + id));
+    Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
 
     return toResponse(item);
   }
@@ -66,6 +67,21 @@ public class ItemServiceImpl implements ItemService {
       responses.add(toResponse(items.get(i))); // 위 네 줄 단축.
     }
     return responses;
+  }
+
+  @Transactional
+  @Override
+  public ItemResponse updateItem(Long id, ItemRequest request) {
+    Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
+    item.updateItem(request.getName(), request.getDescription(), request.getGrade(), LocalDateTime.now());
+    return toResponse(item);
+  }
+
+  @Transactional
+  @Override
+  public void deleteItem(Long id) {
+    Item item = itemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
+    itemRepository.delete(item);
   }
 
   private ItemResponse toResponse(Item item) {

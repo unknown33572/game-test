@@ -5,6 +5,7 @@ import com.study.textgame.dto.ItemResponse;
 import com.study.textgame.service.ItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,5 +29,16 @@ public class ItemController {
     @GetMapping("")
     public List<ItemResponse> viewItems() {
         return itemService.getItems();
+    }
+
+    @PutMapping("/{id}")
+    public ItemResponse updateItem(@PathVariable Long id, @Valid @RequestBody ItemRequest itemRequest) {
+        return itemService.updateItem(id, itemRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
+        return ResponseEntity.noContent().build();
     }
 }

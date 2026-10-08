@@ -1,6 +1,5 @@
 package com.study.textgame.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +16,7 @@ public class Item {
   private String description;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-  
+
   @Enumerated(EnumType.STRING)
   private Grade grade;
 
@@ -29,6 +28,13 @@ public class Item {
     this.description = description;
     this.createdAt = createdAt;
     this.grade = grade;
+  }
+
+  public void updateItem(String name, String description, Grade grade, LocalDateTime updatedAt) {
+    this.name = name;
+    this.description = description;
+    this.grade = grade;
+    this.updatedAt = updatedAt;
   }
 
 }
