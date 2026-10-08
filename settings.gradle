@@ -1,1 +1,4 @@
 rootProject.name = 'text-game-app'
+
+include 'core'
+include 'app'
