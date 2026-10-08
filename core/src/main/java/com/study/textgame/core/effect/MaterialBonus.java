@@ -1,4 +1,4 @@
 package com.study.textgame.core.effect;
 
-public record MaterialBonus(int amount) implements Effect {
+public record MaterialBonus(int percent) implements Effect {
 }
